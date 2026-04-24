@@ -1,0 +1,4 @@
+transaction_id,amount,date,note
+001,50.00,2024-07-10,Payment for INV-001
+003,100.00,2024-07-20,Payment for INV-216
+020,0.00,2024-10-25,Payment for INV-020
