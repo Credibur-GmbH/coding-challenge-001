@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
 
 
 @dataclass
 class Invoice:
     invoice_number: str
     total_amount: float
-    due_date: Optional[date]
+    due_date: date | None
 
     def __str__(self) -> str:
         return f"Invoice({self.invoice_number}, amount={self.total_amount}, due={self.due_date})"

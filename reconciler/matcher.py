@@ -15,19 +15,9 @@ def _extract_invoice_ref(note: str) -> str | None:
 
 
 def reconcile(invoices: list[Invoice], transactions: list[Transaction]) -> ReconciliationReport:
-    """
-    Match invoices to transactions.
-
-    Matching criteria (identified from data analysis):
-      1. Transaction note references the invoice number (e.g. "Payment for INV-001")
-      2. Transaction amount equals invoice total_amount (rounded to 2 decimal places)
-
-    Complexity: O(n + m) using a dict index on invoice_number.
-    """
-    invoice_index: dict[str, Invoice] = {inv.invoice_number: inv for inv in invoices}
-
-    reconciled: list[ReconciledPair] = []
-    unmatched_transactions: list[Transaction] = []
+    invoice_index = {inv.invoice_number: inv for inv in invoices}
+    reconciled = []
+    unmatched_transactions = []
     matched_invoice_numbers: set[str] = set()
 
     for tx in transactions:
@@ -46,20 +36,14 @@ def reconcile(invoices: list[Invoice], transactions: list[Transaction]) -> Recon
             continue
 
         if round(invoice.total_amount, 2) != round(tx.amount, 2):
-            logger.info(
-                "Transaction %s: amount mismatch for %s (invoice=%.2f, tx=%.2f)",
-                tx.id, inv_ref, invoice.total_amount, tx.amount,
-            )
+            logger.info("Transaction %s: amount mismatch for %s (invoice=%.2f, tx=%.2f)", tx.id, inv_ref, invoice.total_amount, tx.amount)
             unmatched_transactions.append(tx)
             continue
 
         reconciled.append(ReconciledPair(invoice=invoice, transaction=tx))
         matched_invoice_numbers.add(inv_ref)
-        logger.debug("Reconciled %s <-> Transaction %s", inv_ref, tx.id)
 
-    unmatched_invoices: list[Invoice] = [
-        inv for inv in invoices if inv.invoice_number not in matched_invoice_numbers
-    ]
+    unmatched_invoices = [invoice_index[k] for k in invoice_index if k not in matched_invoice_numbers]
 
     logger.info(
         "Reconciliation complete: %d matched, %d unmatched invoices, %d unmatched transactions",
